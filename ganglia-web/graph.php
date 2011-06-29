@@ -570,22 +570,29 @@ if ( $user['json_output'] || $user['csv_output'] || $user['flot_output'] ) {
     header("Content-Disposition: inline; filename=\"ganglia-metrics.csv\"");
 
     // Print out headers
-    print "Timestamp,Cluster,Host";
-    foreach ( $metrics_name_array as $key => $value) {
-      print "," . $key;
+    print "Time";
+    $clusters=current($csv_array);
+    foreach ( $clusters as $cluster => $hosts ){
+      foreach ( $hosts as $host => $metrics ){
+        foreach ( $metrics_name_array as $key => $value) {
+	  if( isset( $metrics[$key] ) )
+            print "," . $key . " on " . $host . "@" . $cluster;
+        }
+      }
     }
     print "\n";
 
     // Print out data
     foreach ( $csv_array as $timestamp => $clusters ){
       foreach ( $clusters as $cluster => $hosts ){
+        print date("c", $timestamp);
         foreach ( $hosts as $host => $metrics){
-          print date("c", $timestamp) . "," . $cluster . "," . $host;
           foreach ( $metrics_name_array as $key => $value) {
-            print "," . $metrics[$key];
+            if( isset( $metrics[$key] ) )
+	      print "," . $metrics[$key];
           }
-          print "\n";
         }
+	print "\n";
       }
     }
 
