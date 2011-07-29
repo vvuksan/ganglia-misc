@@ -2,6 +2,7 @@
 <html>
 <head>
 <title>Ganglia: Graph all periods</title>
+<link rel="stylesheet" href="./styles.css" type="text/css" />
 <style>
 .img_view {
   float: left;
@@ -73,7 +74,7 @@ if ( $conf['graph_engine'] == "flot" ) {
 if ( ! isset($_GET['embed'] ) ) {
 ?>
 <!--[if lte IE 8]><script language="javascript" type="text/javascript" src="js/excanvas.min.js"></script><![endif]-->
-<script language="javascript" type="text/javascript" src="js/jquery-1.5.2.min.js"></script>
+<script language="javascript" type="text/javascript" src="js/jquery-1.6.2.min.js"></script>
 <script language="javascript" type="text/javascript" src="js/jquery.flot.min.js"></script>
 <?php
 } // end of if ( ! isset($_GET['embed'] )
@@ -115,18 +116,19 @@ if ( ! isset($_GET['embed'] )  ) {
 foreach ( $conf['time_ranges'] as $key => $value ) {
 
    print '<div class="img_view">' .
-  '<a href="./graph.php?r=' . $key . $query_string .'&csv=1"><img title="Export to CSV" height=16 width=16 src="img/csv.png"></a> ' .
-  '<a href="./graph.php?r=' . $key . $query_string .'&json=1"><img title="Export to JSON" height=16 width=16 src="img/js.png"></a>' .
+  '<a href="./graph.php?r=' . $key . $query_string .'&csv=1"><img title="Export to CSV" src="img/csv.png" class="icon16"></a> ' .
+  '<a href="./graph.php?r=' . $key . $query_string .'&json=1"><img title="Export to JSON" src="img/js.png" class="icon16"></a>' .
   '<br />';
 
   // If we are using flot we need to use a div instead of an image reference
   if ( $conf['graph_engine'] == "flot" ) {
 
     print '<div id="placeholder_' . $key . '" class="flotgraph img_view"></div>';
+    print '<div id="placeholder_' . $key . '_legend" class="flotlegend"></div>';
 
   } else {
 
-    print '<a href="./graph.php?r=' . $key . '&z=' . $xlargesize . $query_string . '"><img alt="Last ' . $key . '" src="graph.php?r=' . $key . '&z=' . $largesize . $query_string . '"></a>';
+    print '<a href="./graph.php?r=' . $key . '&z=' . $xlargesize . $query_string . '"><img class="noborder" title="Last ' . $key . '" src="graph.php?r=' . $key . '&z=' . $largesize . $query_string . '"></a>';
 
   }
 

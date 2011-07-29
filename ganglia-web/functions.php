@@ -7,6 +7,8 @@
 # have been set.
 #
 
+include_once ( dirname(__FILE__) . "/lib/json.php" );
+
 #-------------------------------------------------------------------------------
 # Allows a form of inheritance for template files.
 # If a file does not exist in the chosen template, the
@@ -290,7 +292,10 @@ function find_avg($clustername, $hostname, $metricname)
         "DEF:avg='$sum_dir/$metricname.rrd':'sum':AVERAGE ".
         "PRINT:avg:AVERAGE:%.2lf ";
     exec($command, $out);
-    $avg = $out[1];
+    if ( isset($out[1]) ) 
+      $avg = $out[1];
+    else
+      $avg = 0;
     #echo "$sum_dir: avg($metricname)=$avg<br>\n";
     return $avg;
 }
@@ -717,7 +722,7 @@ function get_available_views() {
     $name[$key]  = strtolower($row['view_name']);
   }
 
-  array_multisort($name,SORT_ASC, $available_views);
+  @array_multisort($name,SORT_ASC, $available_views);
 
   return $available_views;
 
@@ -770,6 +775,9 @@ function get_view_graph_elements($view) {
 	  if (isset($item['vertical_label']))
 	    $graph_args_array[] = "vl=" .$item['vertical_label'];
 
+	  if (isset($item['title']))
+	    $graph_args_array[] = "title=" .$item['title'];
+
 	  if ( isset($item['metric']) ) {
 	    $graph_args_array[] = "m=" . $item['metric'];
 	  }
@@ -777,7 +785,7 @@ function get_view_graph_elements($view) {
 	  $graph_args_array[] = "aggregate=1";
 	  $view_elements[] = array ( "graph_args" => join("&", $graph_args_array), 
 	      "aggregate_graph" => 1,
-	      "name" => isset($item['description']) ? $item['description'] : $item['metric'] . " aggregate graph"
+	      "name" => isset($item['description']) ? $item['description'] : $item['metric_regex'] . " aggregate graph"
 	  );
 
 	  unset($graph_args_array);
@@ -796,6 +804,12 @@ function get_view_graph_elements($view) {
 	  $cluster = $index_array['cluster'][$hostname];
 	  $graph_args_array[] = "h=$hostname";
 	  $graph_args_array[] = "c=$cluster";
+
+	  if (isset($item['vertical_label']))
+	    $graph_args_array[] = "vl=" .$item['vertical_label'];
+
+	  if (isset($item['title']))
+	    $graph_args_array[] = "title=" .$item['title'];
 
 	  $view_elements[] = array ( "graph_args" => join("&", $graph_args_array), 
 	    "hostname" => $hostname,
@@ -960,7 +974,13 @@ function build_rrdtool_args_from_json( &$rrdtool_graph, $graph_config ) {
      
   } // end of foreach( $graph_config[ 'series' ] as $index => $item )
 
-  $rrdtool_graph[ 'series' ] = $series;
+  // If we end up with the empty series it means that no RRD files matched. This can happen
+  // if we are trying to create a report and metrics for this host were not collected. If that
+  // happens we should create an empty graph
+  if ( $series == "" ) 
+    $rrdtool_graph[ 'series' ] = 'HRULE:1#FFCC33:"No matching metrics detected"';   
+  else
+    $rrdtool_graph[ 'series' ] = $series;
   
   
   return $rrdtool_graph;
@@ -1063,5 +1083,10 @@ function checkAccess($resource, $privilege, $conf) {
   }
   
   return $out;
+}
+
+function viewId($view_name) {
+  $id = 'v_' . preg_replace('/[^a-zA-Z0-9_]/', '_', $view_name);
+  return $id;
 }
 ?>

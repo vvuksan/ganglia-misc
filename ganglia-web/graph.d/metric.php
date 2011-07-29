@@ -8,7 +8,6 @@ function graph_metric ( &$rrdtool_graph ) {
 
     global $conf,
            $context,
-           $hostname,
            $jobstart,
            $load_color,
            $max,
@@ -24,7 +23,9 @@ function graph_metric ( &$rrdtool_graph ) {
            $vlabel;
 
     if ($conf['strip_domainname']) {
-        $hostname = strip_domainname($hostname);
+        $hostname = strip_domainname($GLOBALS['hostname']);
+    } else {
+        $hostname = $GLOBALS['hostname'];
     }
 
     $rrdtool_graph['height'] += 0; //no fudge needed
@@ -117,7 +118,7 @@ function graph_metric ( &$rrdtool_graph ) {
 
     //# the actual graph...
     $series  = "DEF:'sum'='$rrd_dir/$metricname.rrd:sum':AVERAGE ";
-    $series .= "AREA:'sum'#${conf['default_metric_color']}:'$subtitle_one\\n'";
+    $series .= "AREA:'sum'#${conf['default_metric_color']}:'$subtitle_one   '";
 
     if ($conf['graphreport_stats'] == false) {
         $series .= ":STACK: COMMENT:'$subtitle_two\\l'";
@@ -147,7 +148,13 @@ function graph_metric ( &$rrdtool_graph ) {
         $series .= "VRULE:$jobstart#${conf['jobstart_color']} ";
     }
 
-    $rrdtool_graph['series'] = $series;
+    // If metric is not present we are likely not collecting it on this
+    // host therefore we should not attempt to build anything and will likely end up with a broken
+    // image. To avoid that we'll make an empty image
+    if ( !file_exists("$rrd_dir/$metricname.rrd") ) 
+      $rrdtool_graph[ 'series' ] = 'HRULE:1#FFCC33:"No matching metrics detected"';   
+    else
+      $rrdtool_graph[ 'series' ] = $series;
 
     return $rrdtool_graph;
 

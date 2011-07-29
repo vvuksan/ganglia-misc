@@ -2,6 +2,10 @@
 #aggregate_graph_table_form {
    font-size: 12px;
 }
+#show_direct_link {
+  background-color: #eeeeee;
+  text-align: center;
+}
 </style>
 <script>
 $(function() {
@@ -11,6 +15,16 @@ $(function() {
   $("#hreg").change(function() {
     $.cookie("ganglia-aggregate-graph-hreg" + window.name,
       $("#hreg").val());
+  });
+
+  $("#vl").change(function() {
+    $.cookie("ganglia-aggregate-graph-vl" + window.name,
+      $("#vl").val());
+  });
+
+  $("#title").change(function() {
+    $.cookie("ganglia-aggregate-graph-title" + window.name,
+      $("#title").val());
   });
 
   $("#aggregate_graph_table_form input[name=gtype]").change(function() {
@@ -30,14 +44,23 @@ $(function() {
     var metric = $.cookie("ganglia-aggregate-graph-metric" + window.name);
     if (metric != null)
       $("#metric_chooser").val(metric);
+
+    var title = $.cookie("ganglia-aggregate-graph-title" + window.name);
+    if (title != null)
+      $("#title").val(title);
+
+    var vl = $.cookie("ganglia-aggregate-graph-vl" + window.name);
+    if (vl != null)
+      $("#vl").val(vl);
   
-    if (hreg != null && gtype != null && metric != null)
+    if (hreg != null && metric != null)
       return true;
     else
       return false;
   }
 
   function createAggregateGraph() {
+    $("#show_direct_link").html("<a href='graph_all_periods.php?" + $("#aggregate_graph_form").serialize() + "&aggregate=1'>Direct Link to this aggregate graph</a>");
     $("#aggregate_graph_display").html('<img src="img/spinner.gif">');
     $.get('graph_all_periods.php', $("#aggregate_graph_form").serialize() + "&aggregate=1" , function(data) {
       $("#aggregate_graph_display").html(data);
@@ -66,15 +89,19 @@ $(function() {
 <form id="aggregate_graph_form">
 <table id="aggregate_graph_table_form">
 <tr>
-<td>Vertical (Y-Axis) label:</td>
-<td colspan=2><input name="vl" id="vl" value="" size=50></td>
+<td>Title:</td>
+<td colspan=2><input name="title" id="title" value="" size=60></td>
+</tr>
 <tr>
+<td>Vertical (Y-Axis) label:</td>
+<td colspan=2><input name="vl" id="vl" value="" size=60></td>
+</tr>
 <tr>
 <td>Host Regular expression e.g. web-[0,4], web or (web|db):</td>
 <td colspan=2><input name="hreg[]" id="hreg" size=60></td>
-<tr>
+</tr>
 <tr><td>Metric Regular expression (not a report e.g. load_one, bytes_(in|out)):</td>
-<td colspan=2><input name="mreg[]" id="metric_chooser"></td>
+<td colspan=2><input name="mreg[]" id="metric_chooser" size=60></td>
 </tr>
 <tr>
 <td>Graph Type:</td><td>
@@ -87,6 +114,7 @@ $(function() {
 </table>
 </form>
 </div>
+<div id="show_direct_link"></div>
 <div id="aggregate_graph_display">
 
 </div>

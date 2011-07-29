@@ -2,6 +2,7 @@
  /* $Id: cluster_view.php 2588 2011-05-02 21:19:54Z vvuksan $ */
 $tpl = new Dwoo_Template_File( template("cluster_view.tpl") );
 $data = new Dwoo_Data();
+$data->assign("php_gd", (function_exists('imagegif') or function_exists('imagepng')));
 $data->assign("extra", template("cluster_extra.tpl"));
 
 $data->assign("images","./templates/${conf['template_name']}/images");
@@ -94,9 +95,8 @@ $reports["excluded_reports"] = array_unique($reports["excluded_reports"]);
 
 foreach ( $reports["included_reports"] as $index => $report_name ) {
   if ( ! in_array( $report_name, $reports["excluded_reports"] ) ) {
-    $optional_reports .= "<a name=metric_" . $report_name . ">
-    <A HREF=\"./graph_all_periods.php?$graph_args&amp;g=" . $report_name . "&amp;z=large&amp;c=$cluster_url\">
-    <IMG BORDER=0 $additional_cluster_img_html_args ALT=\"$cluster_url\" SRC=\"./graph.php?$graph_args&amp;g=" . $report_name ."&amp;z=medium&amp;c=$cluster_url\"></A>
+    $optional_reports .= "<A HREF=\"./graph_all_periods.php?$graph_args&amp;g=" . $report_name . "&amp;z=large&amp;c=$cluster_url\">
+    <IMG BORDER=0 style=\"padding:2px;\" $additional_cluster_img_html_args title=\"$cluster_url\" SRC=\"./graph.php?$graph_args&amp;g=" . $report_name ."&amp;z=medium&amp;c=$cluster_url\"></A>
 ";
   }
 
@@ -205,7 +205,7 @@ if ($showhosts)
                continue;
             $n = $percent_hosts[$color];
             $name_url = rawurlencode($name);
-            $pie_args .= "&$name_url=$n,$color";
+            $pie_args .= "&amp;$name_url=$n,$color";
          }
       $data->assign("pie_args", $pie_args);
 
@@ -356,12 +356,12 @@ foreach ( $sorted_hosts as $host => $value )
             $cell="<td><div><font style='font-size: 8px'>$host</font><br><a href=$host_link><img $additional_host_img_html_args src=\"./graph.php?";
             $cell .= (isset($reports[$metricname]) and $reports[$metricname])
                ? "g=$metricname" : "m=$metricname";
-            $cell .= "&amp;$graphargs\" alt=\"$host\" border=0></a></div></td>";
+            $cell .= "&amp;$graphargs\" title=\"$host\" border=0 style=\"padding:2px;\"></a></div></td>";
          }
 
       if ($conf['hostcols'] == 0) {
          $pre = "<td><a href=$host_link><img src=\"./graph.php?g=";
-         $post = "&amp;$graphargs\" $additional_host_img_html_args alt=\"$host\" border=0></a></td>";
+         $post = "&amp;$graphargs\" $additional_host_img_html_args title=\"$host\" border=0 style=\"padding:2px;\"></a></td>";
          $cell .= $pre . "load_report" . $post;
          $cell .= $pre . "mem_report" . $post;
          $cell .= $pre . "cpu_report" . $post;

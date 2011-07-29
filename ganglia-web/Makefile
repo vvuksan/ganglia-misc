@@ -13,9 +13,10 @@ SNAPSHOT = yes
 
 # Gweb statedir (where RRD files, Dwoo templates are stored)
 GWEB_STATEDIR = /var/lib
+GANGLIA_STATEDIR = $(GWEB_STATEDIR)/ganglia
 
 # Dwoo compile directory
-GWEB_DWOO = $(GWEB_STATEDIR)/ganglia/dwoo
+GWEB_DWOO = $(GANGLIA_STATEDIR)/dwoo
 
 ifeq ($(SNAPSHOT),yes)
 	GWEB_NANO_VERSION = $(shell svnversion .)
@@ -44,14 +45,14 @@ version.php:	version.php.in
 	sed -e s/@GWEB_VERSION@/$(GWEB_VERSION)/ version.php.in > version.php
 
 dist-dir:	default
-	rsync --exclude "$(DIST_DIR)" --exclude ".svn" --exclude ".git*" -a . $(DIST_DIR) && \
+	rsync --exclude "$(DIST_DIR)" --exclude ".svn" --exclude ".git*" --exclude "*~" -a . $(DIST_DIR) && \
 	cp -a $(TARGETS) $(DIST_DIR)
 
 install:	dist-dir
-	mkdir -p $(DESTDIR) $(DESTDIR)/conf $(GWEB_DWOO) && \
-	mv $(DIST_DIR)/conf $(GWEB_STATEDIR)/ganglia && \
+	mkdir -p $(DESTDIR) $(GWEB_DWOO) && \
+	rsync -a $(DIST_DIR)/conf/ $(GANGLIA_STATEDIR)/conf && \
 	cp -a $(DIST_DIR)/* $(DESTDIR) && \
-	chown -R $(APACHE_USER):$(APACHE_USER) $(GWEB_DWOO) $(GWEB_STATEDIR)/ganglia/conf ${DESTDIR}/conf
+	chown -R $(APACHE_USER):$(APACHE_USER) $(GWEB_DWOO) $(GANGLIA_STATEDIR)/conf
 
 dist-gzip:	dist-dir
 	if [ -f $(DIST_TARBALL) ]; then \
@@ -60,4 +61,4 @@ dist-gzip:	dist-dir
 	tar -czf $(DIST_TARBALL) $(DIST_DIR)/*
 
 uninstall:
-	rm -rf $(DESTDIR) $(GWEB_DWOO) $(GWEB_STATEDIR)/ganglia/conf
+	rm -rf $(DESTDIR) $(GWEB_DWOO) $(GANGLIA_STATEDIR)/conf

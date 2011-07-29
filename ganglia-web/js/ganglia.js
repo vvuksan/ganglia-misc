@@ -25,8 +25,12 @@ $(function(){
         }
       }
     } catch (err) {
-      alert("Error(ganglia.js): Unable to select tab: " + 
-            tab_index + ". " + err.getDescription());
+      try {
+          alert("Error(ganglia.js): Unable to select tab: " + 
+                tab_index + ". " + err.getDescription());
+      } catch (err) {
+          // If we can't even show the error, fail silently.
+      }
     }
   }
 
@@ -76,7 +80,17 @@ function selectTab(tab_index) {
   $("#tabs").tabs("select", tab_index);
 }
 
+function viewId(view_name) {
+  return "v_" + view_name.replace(/[^a-zA-Z0-9_]/g, "_");
+}
+
+function highlightSelectedView(view_name) {
+  $("#navlist a").css('background-color', '#FFFFFF');	
+  $("#" + viewId(view_name)).css('background-color', 'rgb(238,238,238)');
+}
+
 function selectView(view_name) {
+  highlightSelectedView(view_name);
   $.cookie('ganglia-selected-view-' + window.name, view_name); 
   var range = $.cookie('ganglia-view-range-' + window.name);
   if (range == null)
@@ -106,6 +120,7 @@ function getViewsContent() {
 	$("#view-range-"+range).click();
     } else
       view_name.value = "default";
+    highlightSelectedView(view_name.value);
   });
   return false;
 }
@@ -136,10 +151,10 @@ function addItemToView() {
   });
   return false;  
 }
-function metricActions(host_name,metric_name,type) {
+function metricActions(host_name,metric_name,type,graphargs) {
     $( "#metric-actions-dialog" ).dialog( "open" );
     $("#metric-actions-dialog-content").html('<img src="img/spinner.gif">');
-    $.get('actions.php', "action=show_views&host_name=" + host_name + "&metric_name=" + metric_name + "&type=" + type, function(data) {
+    $.get('actions.php', "action=show_views&host_name=" + host_name + "&metric_name=" + metric_name + "&type=" + type + graphargs, function(data) {
       $("#metric-actions-dialog-content").html(data);
      });
     return false;

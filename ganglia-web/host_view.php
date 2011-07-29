@@ -60,19 +60,22 @@ $data->assign("additional_cluster_img_html_args", $additional_cluster_img_html_a
 foreach ( $reports["included_reports"] as $index => $report_name ) {
 
   if ( ! in_array( $report_name, $reports["excluded_reports"] ) ) {
-    $optional_reports .= "<a name=metric_" . $report_name . ">
-    <a href=\"./graph_all_periods.php?$graph_args&amp;g=" . $report_name . "&amp;z=large&amp;c=$cluster_url\">";
+    //$optional_reports .= "<a name=metric_" . $report_name . ">
+    $optional_reports .= "<a href=\"./graph_all_periods.php?$graph_args&amp;g=" . $report_name . "&amp;z=large&amp;c=$cluster_url\">";
 
-    if ( $conf['graph_engine'] == "flot" ) 
-      $optional_reports .= '<div id="placeholder_' . $graph_args . '&amp;g=' . $report_name .'&amp;z=medium&amp;c=' . $cluster_url . '" class="flotgraph2 img_view"></div>';
-    else
-      $optional_reports .= "<IMG $additional_cluster_img_html_args BORDER=0 ALT=\"$cluster_url\" SRC=\"./graph.php?$graph_args&amp;g=" . $report_name ."&amp;z=medium&amp;c=$cluster_url\"></A>";
+    if ( $conf['graph_engine'] == "flot" ) {
+      $optional_reports .= '<div id="placeholder_' . $graph_args . '&amp;g=' . $report_name .'&amp;z=medium&amp;c=' . $cluster_url . '" class="flotgraph2 img_view"></div>' .
+      $optional_reports .= '<div id="placeholder_' . $graph_args . '&amp;g=' . $report_name .'&amp;z=medium&amp;c=' . $cluster_url . '_legend" class="flotlegend"></div>';
+    } else {
+      $optional_reports .= "<img $additional_cluster_img_html_args border=\"0\" title=\"$cluster_url\" SRC=\"./graph.php?$graph_args&amp;g=" . $report_name ."&amp;z=medium&amp;c=$cluster_url\" style=\"padding:2px;\" />";
+    }
+    $optional_reports .= "</a>";
 
     if(checkAccess(GangliaAcl::ALL_VIEWS, GangliaAcl::EDIT, $conf)) {
-      $optional_reports .= "<a style=\"background-color: #dddddd\" onclick=\"metricActions('" . $hostname . "','" . $report_name ."','graph'); return false;\" href=\"#\">+</a> ";
+      $optional_reports .= "<a style=\"background-color: #dddddd\" onclick=\"metricActions('" . $hostname . "','" . $report_name ."','graph',''); return false;\" href=\"#\" title=\"Metric Actions\">+</a> ";
     }
-    $optional_reports .= "<a href=\"./graph.php?$graph_args&amp;g=" . $report_name . "&amp;z=large&amp;c=$cluster_url&csv=1\"><img title=\"Export to CSV\" border=0 height=16 width=16 src=\"img/csv.png\"></a>
-    <a href=\"./graph.php?$graph_args&amp;g=" . $report_name . "&amp;z=large&amp;c=$cluster_url&json=1\"><img title=\"Export to JSON\" border=0 height=16 width=16 src=\"img/js.png\"></a>";
+    $optional_reports .= "<a href=\"./graph.php?$graph_args&amp;g=" . $report_name . "&amp;z=large&amp;c=$cluster_url&amp;csv=1\"><img title=\"Export to CSV\" class=\"icon16\" src=\"img/csv.png\" /></a>
+    <a href=\"./graph.php?$graph_args&amp;g=" . $report_name . "&amp;z=large&amp;c=$cluster_url&amp;json=1\"><img title=\"Export to JSON\" class=\"icon16\" src=\"img/js.png\" /></a>";
   }
 
 }
@@ -145,10 +148,12 @@ foreach ($metrics as $name => $v)
              }
              if (isset($v['TITLE'])) {
                 $title = $v['TITLE'];
-                $graphargs .= "&amp;ti=$title";
+		$encodeTitle = rawurlencode($title);
+                $graphargs .= "&amp;ti=$encodeTitle";
              }
              $g_metrics[$name]['graph'] = $graphargs;
              $g_metrics[$name]['description'] = isset($v['DESC']) ? $v['DESC'] : '';
+             $g_metrics[$name]['title'] = isset($v['TITLE']) ? $v['TITLE'] : '';
 
              # Setup an array of groups that can be used for sorting in group view
              if ( isset($metrics[$name]['GROUP']) ) {
@@ -270,11 +275,10 @@ if ( is_array($g_metrics) && is_array($g_metrics_group) )
                   if ( in_array($name, $metric_array) ) {
                      $g_metrics_group_data[$group]["metrics"][$name]["graphargs"] = $v['graph'];
                      $g_metrics_group_data[$group]["metrics"][$name]["alt"] = "$hostname $name";
-                     $g_metrics_group_data[$group]["metrics"][$name]["desc"] = "";
-		     $g_metrics_group_data[$group]["metrics"][$name]["host_name"] = $hostname;
+                     $g_metrics_group_data[$group]["metrics"][$name]["host_name"] = $hostname;
                      $g_metrics_group_data[$group]["metrics"][$name]["metric_name"] = $name;
-                     if (isset($v['description']))
-                       $g_metrics_group_data[$group]["metrics"][$name]["desc"] = $v['description'];
+                     $g_metrics_group_data[$group]["metrics"][$name]["title"] = $v['title'];
+                     $g_metrics_group_data[$group]["metrics"][$name]["desc"] = $v['description'];
                      $g_metrics_group_data[$group]["metrics"][$name]["new_row"] = "";
                      if ( !(++$i % $conf['metriccols']) && ($i != $c) )
                         $g_metrics_group_data[$group]["metrics"][$name]["new_row"] = "</TR><TR>";

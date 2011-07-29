@@ -8,13 +8,13 @@ $base_dir = dirname(__FILE__);
 set_include_path( "$base_dir/lib:" . ini_get( 'include_path' ) );
 
 # Load main config file.
-require_once "./conf_default.php";
+require_once $base_dir . "/conf_default.php";
 require_once 'lib/GangliaAcl.php';
 require_once 'lib/GangliaAuth.php';
 
 # Include user-defined overrides if they exist.
-if( file_exists( "./conf.php" ) ) {
-  include_once "./conf.php";
+if( file_exists( $base_dir . "/conf.php" ) ) {
+  include_once $base_dir . "/conf.php";
 }
 
 $errors = array();
@@ -50,7 +50,7 @@ if( ! isSet( $conf['auth_system'] ) ) {
       Requires configuration of an authentication mechanism in your web server.
     </li>
   </ul>
-  <br/>See <a href='https://sourceforge.net/apps/trac/ganglia/wiki/ganglia-web-2/AuthSystem'>https://sourceforge.net/apps/trac/ganglia/wiki/ganglia-web-2/AuthSystem</a> for more information.";
+  <br/>See <a href=\"https://sourceforge.net/apps/trac/ganglia/wiki/ganglia-web-2/AuthSystem\">https://sourceforge.net/apps/trac/ganglia/wiki/ganglia-web-2/AuthSystem</a> for more information.";
 } else {
   if( ! in_array( $conf['auth_system'], $valid_auth_options ) ) {
     $errors[] = "Please set \$conf['auth_system'] to one of these values: '".implode( "','", $valid_auth_options ) ."'";
@@ -65,13 +65,20 @@ if( ! isSet( $conf['auth_system'] ) ) {
 }
 
 if( count($errors) ) {
-  echo "<h1>Errors were detected in your configuration.</h1>";
-  echo "<ul class='errors'>";
+  $e = "<h1>Errors were detected in your configuration.</h1>";
+  $e .= "<ul class=\"errors\">";
   foreach($errors as $error) {
-    echo "<li>$error</li>";
+    $e .= "<li>$error</li>";
   }
-  echo "</ul>";
-  die();
+  $e .= "</ul>";
+
+  // Make sure that errors are actually displayed, whether or not the local
+  // PHP configuration is set to display them, otherwise it looks as though
+  // a blank page is being served.
+  ini_set('display_errors', 1);
+  error_reporting(E_ALL);
+
+  trigger_error( $e, E_USER_ERROR );
 }
 
 # These are settings derived from the configuration settings, and
