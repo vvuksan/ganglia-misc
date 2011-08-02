@@ -7,12 +7,15 @@
 <meta http-equiv="refresh" content="{$refresh}">
 <script TYPE="text/javascript" SRC="js/jquery-1.6.2.min.js"></script>
 <script type="text/javascript" src="js/jquery-ui-1.8.11.custom.min.js"></script>
+<script type="text/javascript" src="js/jquery.mousewheel-3.0.4.pack.js"></script>
+<script type="text/javascript" src="js/jquery.fancybox-1.3.4.pack.js"></script>
 <script type="text/javascript" src="js/jquery.liveSearch.js"></script>
 <script type="text/javascript" src="js/ganglia.js"></script>
 <script type="text/javascript" src="js/jquery.gangZoom.js"></script>
 <script type="text/javascript" src="js/jquery.cookie.js"></script>
 <link type="text/css" href="css/smoothness/jquery-ui-1.8.11.custom.css" rel="stylesheet" />
 <link type="text/css" href="css/jquery.liveSearch.css" rel="stylesheet" />
+<link rel="stylesheet" type="text/css" href="css/jquery.fancybox-1.3.4.css" media="screen" />
 <link rel="stylesheet" href="./styles.css" type="text/css" />
 <style type="text/css">
     body{ font: 75% "Trebuchet MS", sans-serif; margin: 5px;}
