@@ -6,6 +6,46 @@
 }
 </style>
 <script type="text/javascript">
+var SEPARATOR = "_|_";
+
+function addMetricGroup(mgId) {
+  var stored_groups = $('input[name="metric_group"]');
+  var open_groups = stored_groups.val();
+  if (open_groups != "")
+    open_groups += SEPARATOR;
+  open_groups += mgId
+  stored_groups.val(open_groups);
+}
+
+function removeMetricGroup(mgId) {
+  var stored_groups = $('input[name="metric_group"]');
+  var open_groups = stored_groups.val().split(SEPARATOR);
+  for (var i = 0; i < open_groups.length; i++) {
+    if (open_groups[i] == mgId) {
+      open_groups.splice(i, 1);
+      break;
+    }
+  }
+  stored_groups.val(open_groups.join(SEPARATOR));
+}
+
+function toggleMetricGroup(mgId, mgDiv) {
+  if (mgDiv.is(":visible"))
+    // metric group is being closed
+    removeMetricGroup(mgId);
+  else
+    addMetricGroup(mgId);
+  document.ganglia_form.submit();
+}
+
+function enlargeGraph(graphArgs) {
+  $("#enlarge-graph-dialog").dialog('open');
+//  $('#enlarge-graph-dialog-content').html('<img src="graph.php?' + graphArgs + '" />');
+  $.get('enlarge_graph.php', "flot=1&" + graphArgs, function(data) {
+    $('#enlarge-graph-dialog-content').html(data);
+  })
+}
+
 $(function() {
   // Modified from http://jqueryui.com/demos/toggle/
   //run the currently selected effect
@@ -16,7 +56,7 @@ $(function() {
     options = { to: { width: 200,height: 60 } }; 
     
     //run the effect
-    $("#"+id+"_div").toggle("blind",options,500);
+    $("#"+id+"_div").toggle("blind",options,500,toggleMetricGroup(id, $("#"+id+"_div")));
   };
  
   //set effect from select menu value
@@ -27,10 +67,11 @@ $(function() {
 
     $(function() {
 	    $( "#edit_optional_graphs" ).dialog({ autoOpen: false, minWidth: 550,
-	      beforeClose: function(event, ui) {  location.reload(true); } })
+	      beforeClose: function(event, ui) {  location.reload(true); } });
 	    $( "#edit_optional_graphs_button" ).button();
 	    $( "#save_optional_graphs_button" ).button();
 	    $( "#close_edit_optional_graphs_link" ).button();
+	    $( "#enlarge-graph-dialog" ).dialog({ autoOpen: false, minWidth: 850 });
     });
 
     $("#edit_optional_graphs_button").click(function(event) {
@@ -75,6 +116,10 @@ $(function() {
 <div id="metric-actions-dialog" title="Metric Actions">
   <div id="metric-actions-dialog-content">
 	Available Metric actions.
+  </div>
+</div>
+<div id="enlarge-graph-dialog" title="Enlarge Graph">
+  <div id="enlarge-graph-dialog-content">
   </div>
 </div>
 
@@ -185,6 +230,8 @@ $(function() {
 <tr>
  <td>
 
+{$open_groups=""}
+
 {foreach $g_metrics_group_data group g_metrics}
 <table border="0" width="100%">
 <tr>
@@ -193,21 +240,28 @@ $(function() {
   </td>
 </tr>
 </table>
-{if isset($metric_groups_initially_collapsed) && $metric_groups_initially_collapsed}
-<div id="{$group}_div" class="ui-helper-hidden">
-{else}
+
+{if $g_metrics.visible}
 <div id="{$group}_div">
+{else}
+<div id="{$group}_div" class="ui-helper-hidden">
 {/if}
+{if $g_metrics.visible}
+{if $open_groups != ""}
+{$open_groups = cat($open_groups, "_|_")}
+{/if}
+{$open_groups = cat($open_groups, $group)}
 <table><tr>
 {foreach $g_metrics["metrics"] g_metric}
 <td>
 <font style="font-size: 9px">{$g_metric.metric_name} {if $g_metric.title != '' && $g_metric.title != $g_metric.metric_name}- {$g_metric.title}{/if}</font>
 {if $may_edit_views}
 {$graph_args = "&amp;";$graph_args .= $g_metric.graphargs;}
-<a style="background-color: #dddddd" onclick="metricActions('{$g_metric.host_name}','{$g_metric.metric_name}', 'metric', '{$graph_args}'); return false;" href="#">+</a>
+<button class="cupid-green" title="Metric Actions - Add to View, etc" onclick="metricActions('{$g_metric.host_name}','{$g_metric.metric_name}', 'metric', '{$graph_args}'); return false;">+</button>
 {/if}
-<a href="./graph.php?{$g_metric.graphargs}&amp;csv=1"><img title="Export to CSV" class="icon16" src="img/csv.png" /></a>
-<a href="./graph.php?{$g_metric.graphargs}&amp;json=1"><img title="Export as JSON" class="icon16" src="img/js.png" /></a>
+<a href="./graph.php?{$g_metric.graphargs}&amp;csv=1"><button title="Export to CSV" class="cupid-green">CSV</button></a>
+<a href="./graph.php?{$g_metric.graphargs}&amp;json=1"><button title="Export to JSON" class="cupid-green">JSON</button></a>
+<button title="Enlarge Graph" onClick="enlargeGraph('{$g_metric.graphargs}'); return false;" class="cupid-green">Enlarge</button>
 <br>
 {if $graph_engine == "flot"}
 <div id="placeholder_{$g_metric.graphargs}" class="flotgraph2 img_view"></div>
@@ -222,12 +276,13 @@ $(function() {
 {/foreach}
 </tr>
 </table>
+{/if}
 </div>
 {/foreach}
  </td>
 </tr>
 </table>
 </center>
-
+<input type="hidden" name="metric_group" value="{$open_groups}">
 </div>
 <!-- End host_view.tpl -->

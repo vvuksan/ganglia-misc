@@ -15,11 +15,7 @@ $data->assign("range",$range);
 $data->assign("hostname", $hostname);
 $data->assign("graph_engine", $conf['graph_engine']);
 
-if ( isset($conf['metric_groups_initially_collapsed']) && 
-     $conf['metric_groups_initially_collapsed'] === true )
-  $data->assign("metric_groups_initially_collapsed", true);
-else
-  $data->assign("metric_groups_initially_collapsed", false);
+$metric_groups_initially_collapsed = isset($conf['metric_groups_initially_collapsed']) ? $conf['metric_groups_initially_collapsed'] : TRUE;
 
 $graph_args = "h=$hostname&amp;$get_metric_string&amp;st=$cluster[LOCALTIME]";
 
@@ -67,15 +63,16 @@ foreach ( $reports["included_reports"] as $index => $report_name ) {
       $optional_reports .= '<div id="placeholder_' . $graph_args . '&amp;g=' . $report_name .'&amp;z=medium&amp;c=' . $cluster_url . '" class="flotgraph2 img_view"></div>' .
       $optional_reports .= '<div id="placeholder_' . $graph_args . '&amp;g=' . $report_name .'&amp;z=medium&amp;c=' . $cluster_url . '_legend" class="flotlegend"></div>';
     } else {
-      $optional_reports .= "<img $additional_cluster_img_html_args border=\"0\" title=\"$cluster_url\" SRC=\"./graph.php?$graph_args&amp;g=" . $report_name ."&amp;z=medium&amp;c=$cluster_url\" style=\"padding:2px;\" />";
+      $optional_reports .= "
+      <img $additional_cluster_img_html_args border=\"0\" title=\"$cluster_url\" SRC=\"./graph.php?$graph_args&amp;g=" . $report_name ."&amp;z=medium&amp;c=$cluster_url\" style=\"padding:2px;\" />";
     }
     $optional_reports .= "</a>";
 
     if(checkAccess(GangliaAcl::ALL_VIEWS, GangliaAcl::EDIT, $conf)) {
-      $optional_reports .= "<a style=\"background-color: #dddddd\" onclick=\"metricActions('" . $hostname . "','" . $report_name ."','graph',''); return false;\" href=\"#\" title=\"Metric Actions\">+</a> ";
+      $optional_reports .= "<button class=\"cupid-green\" title=\"Metric Actions - Add to View, etc\" onclick=\"metricActions('" . $hostname . "','" . $report_name ."','graph','');  return false;\">+</button>";
     }
-    $optional_reports .= "<a href=\"./graph.php?$graph_args&amp;g=" . $report_name . "&amp;z=large&amp;c=$cluster_url&amp;csv=1\"><img title=\"Export to CSV\" class=\"icon16\" src=\"img/csv.png\" /></a>
-    <a href=\"./graph.php?$graph_args&amp;g=" . $report_name . "&amp;z=large&amp;c=$cluster_url&amp;json=1\"><img title=\"Export to JSON\" class=\"icon16\" src=\"img/js.png\" /></a>";
+    $optional_reports .= " <a href=\"./graph.php?$graph_args&amp;g=" . $report_name . "&amp;z=large&amp;c=$cluster_url&amp;csv=1\"><button title=\"Export to CSV\" class=\"cupid-green\">CSV</button></a>
+    <a href=\"./graph.php?$graph_args&amp;g=" . $report_name . "&amp;z=large&amp;c=$cluster_url&amp;json=1\"><button title=\"Export to JSON\" class=\"cupid-green\">JSON</button></a>";
   }
 
 }
@@ -254,6 +251,8 @@ if (isset($c_metrics) and is_array($c_metrics))
    }
 $data->assign("c_metrics_data", $c_metrics_data);
 
+$open_groups = ( isset($_GET['metric_group']) ) ? explode ("_|_", $_GET['metric_group']) : NULL;
+
 # Show graphs.
 if ( is_array($g_metrics) && is_array($g_metrics_group) )
    {
@@ -268,6 +267,12 @@ if ( is_array($g_metrics) && is_array($g_metrics_group) )
             $c = count($metric_array);
             $g_metrics_group_data[$group]["group_metric_count"] = $c;
             $host_metrics += $c;
+            if ($open_groups == NULL)
+              $g_metrics_group_data[$group]["visible"] = 
+                ! $metric_groups_initially_collapsed;
+            else {
+              $g_metrics_group_data[$group]["visible"] = in_array($group, $open_groups);
+            }
             $i = 0;
             ksort($g_metrics);
             foreach ( $g_metrics as $name => $v )
