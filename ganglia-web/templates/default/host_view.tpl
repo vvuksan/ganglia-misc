@@ -62,7 +62,6 @@ $(function() {
   //set effect from select menu value
   $('.button').click(function(event) {
     runEffect(event.target.id);
-    return false;
   });
 
     $(function() {
@@ -124,7 +123,7 @@ $(function() {
 </div>
 
 <div style="padding-bottom:5px;">
-<a href="#" id="host_overview" class="button ui-state-default ui-corner-all">Host overview</a>
+<button id="host_overview" class="button ui-state-default ui-corner-all">Host Overview</button>
 </div>
 
 <div style="display: none;" id="host_overview_div">
@@ -236,7 +235,7 @@ $(function() {
 <table border="0" width="100%">
 <tr>
   <td class="metric">
-  <a href="#" id="{$group}" class="button ui-state-default ui-corner-all" title="Toggle {$group} metrics group on/off">{$group} metrics ({$g_metrics.group_metric_count})</a>
+  <button id="{$group}" class="button ui-state-default ui-corner-all" title="Toggle {$group} metrics group on/off">{$group} metrics ({$g_metrics.group_metric_count})</button>
   </td>
 </tr>
 </table>
