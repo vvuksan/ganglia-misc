@@ -547,24 +547,47 @@ if ( $user['json_output'] || $user['csv_output'] || $user['flot_output'] || $use
 
   if ( $user['csv_output'] ) {
 
+    $csv_array=array();
+    $metrics_name_array=array();
+    foreach ( $output_array as $key => $metric_array ) {
+      foreach ($metric_array['metrics'] as $key => $value ) {
+        $timestamp = $value['timestamp'];
+        $cluster_name = $metric_array['cluster_name'];
+        $host_name = strip_domainname( $metric_array['host_name'] );
+        $metric_name = $metric_array['metric_name'];
+        $csv_array[$timestamp][$cluster_name][$host_name][$metric_name] = $value['value'];
+        $metrics_name_array[$metric_name] = 1;
+      }
+    }
+
     header("Content-Type: application/csv");
     header("Content-Disposition: inline; filename=\"ganglia-metrics.csv\"");
 
-    print "Timestamp";
-
     // Print out headers
-    for ( $i = 0 ; $i < sizeof($output_array) ; $i++ ) {
-      print "," . $output_array[$i]["metric_name"];
+    print "Time";
+    $clusters=current($csv_array);
+    foreach ( $clusters as $cluster => $hosts ){
+      foreach ( $hosts as $host => $metrics ){
+        foreach ( $metrics_name_array as $key => $value) {
+	  if( isset( $metrics[$key] ) )
+            print "," . $key . " on " . $host . "@" . $cluster;
+        }
+      }
     }
-
     print "\n";
 
-    foreach ( $output_array[0]["metrics"] as $key => $row ) {
-      print date("c", $row["timestamp"]);
-      for ( $j = 0 ; $j < $num_of_metrics ; $j++ ) {
-        print "," .$output_array[$j]["metrics"][$key]["value"];
+    // Print out data
+    foreach ( $csv_array as $timestamp => $clusters ){
+      foreach ( $clusters as $cluster => $hosts ){
+        print date("c", $timestamp);
+        foreach ( $hosts as $host => $metrics){
+          foreach ( $metrics_name_array as $key => $value) {
+            if( isset( $metrics[$key] ) )
+	      print "," . $metrics[$key];
+          }
+        }
+	print "\n";
       }
-      print "\n";
     }
 
   }
