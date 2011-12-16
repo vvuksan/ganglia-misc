@@ -40,17 +40,23 @@ $total_cmd = " CDEF:'total'=0";
 # We'll get the list of hosts from here
 retrieve_metrics_cache();
 
-$counter = 0;
-
+// create sorted array
+$hosts = array();
 foreach($index_array['cluster'] as $host => $cluster ) {
-    
     if ( $cluster == $clustername ) {
-        $filename = $conf['rrds'] . "/$clustername/$host/$metricname.rrd";
-        if (file_exists($filename)) {
-            $c++;
-            $command .= " DEF:'a$c'='$filename':'sum':AVERAGE";
-            $total_cmd .= ",a$c,+";
-        }
+        $hosts[] = $host;
+    }
+}
+sort($hosts);
+
+foreach($hosts as $key => $host) {
+    $filename = $conf['rrds'] . "/$clustername/$host/$metricname.rrd";
+    if (file_exists($filename)) {
+        $c++;
+        $command .= " DEF:'a$c'='$filename':'sum':AVERAGE";
+        $total_cmd .= ",a$c,+";
+    } else {
+        unset($hosts[$key]);
     }
 }
 
