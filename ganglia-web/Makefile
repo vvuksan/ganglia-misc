@@ -8,9 +8,6 @@ GWEB_MAJOR_VERSION = 2
 GWEB_MINOR_VERSION = 1
 GWEB_MICRO_VERSION = 8
 
-# When set to "yes", GWEB_VERSION will include SVN revision
-SNAPSHOT = yes
-
 # Gweb statedir (where RRD files, Dwoo templates are stored)
 GWEB_STATEDIR = /var/lib
 GANGLIA_STATEDIR = $(GWEB_STATEDIR)/ganglia
@@ -18,12 +15,7 @@ GANGLIA_STATEDIR = $(GWEB_STATEDIR)/ganglia
 # Dwoo compile directory
 GWEB_DWOO = $(GANGLIA_STATEDIR)/dwoo
 
-ifeq ($(SNAPSHOT),yes)
-	GWEB_NANO_VERSION = $(shell svnversion .)
-	GWEB_VERSION = ${GWEB_MAJOR_VERSION}.${GWEB_MINOR_VERSION}.${GWEB_MICRO_VERSION}.${GWEB_NANO_VERSION}
-else
-	GWEB_VERSION = $(GWEB_MAJOR_VERSION).$(GWEB_MINOR_VERSION).$(GWEB_MICRO_VERSION)
-endif
+GWEB_VERSION = $(GWEB_MAJOR_VERSION).$(GWEB_MINOR_VERSION).$(GWEB_MICRO_VERSION)
 
 DIST_DIR = gweb-$(GWEB_VERSION)
 DIST_TARBALL = $(DIST_DIR).tar.gz
@@ -49,10 +41,10 @@ dist-dir:	default
 	cp -a $(TARGETS) $(DIST_DIR)
 
 install:	dist-dir
-	mkdir -p $(DESTDIR) $(GWEB_DWOO) && \
-	rsync -x debian -a $(DIST_DIR)/conf/ $(GANGLIA_STATEDIR)/conf && \
+	mkdir -p $(DESTDIR)/$(GWEB_DWOO) && \
+	rsync -x debian -a $(DIST_DIR)/conf/ $(DESTDIR)/$(GANGLIA_STATEDIR)/conf && \
 	cp -a $(DIST_DIR)/* $(DESTDIR) && \
-	chown -R $(APACHE_USER):$(APACHE_USER) $(GWEB_DWOO) $(GANGLIA_STATEDIR)/conf
+	chown -R $(APACHE_USER):$(APACHE_USER) $(DESTDIR)/$(GWEB_DWOO) $(DESTDIR)/$(GANGLIA_STATEDIR)/conf
 
 dist-gzip:	dist-dir
 	if [ -f $(DIST_TARBALL) ]; then \
@@ -62,3 +54,4 @@ dist-gzip:	dist-dir
 
 uninstall:
 	rm -rf $(DESTDIR) $(GWEB_DWOO) $(GANGLIA_STATEDIR)/conf
+
