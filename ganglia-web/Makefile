@@ -37,12 +37,12 @@ version.php:	version.php.in
 	sed -e s/@GWEB_VERSION@/$(GWEB_VERSION)/ version.php.in > version.php
 
 dist-dir:	default
-	rsync --exclude "$(DIST_DIR)" --exclude ".svn" --exclude ".git*" --exclude "*~" -a . $(DIST_DIR) && \
+	rsync --exclude "$(DIST_DIR)" --exclude ".git*" --exclude "*~" -a . $(DIST_DIR) && \
 	cp -a $(TARGETS) $(DIST_DIR)
 
 install:	dist-dir
 	mkdir -p $(DESTDIR)/$(GWEB_DWOO) && \
-	rsync -x debian -a $(DIST_DIR)/conf/ $(DESTDIR)/$(GANGLIA_STATEDIR)/conf && \
+	rsync --exclude debian -a $(DIST_DIR)/conf/ $(DESTDIR)/$(GANGLIA_STATEDIR)/conf && \
 	cp -a $(DIST_DIR)/* $(DESTDIR) && \
 	chown -R $(APACHE_USER):$(APACHE_USER) $(DESTDIR)/$(GWEB_DWOO) $(DESTDIR)/$(GANGLIA_STATEDIR)/conf
 
