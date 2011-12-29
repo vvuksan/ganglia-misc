@@ -1280,9 +1280,9 @@ function ganglia_cache_metrics() {
         }
         // Set up for cluster summary
         $context = "index_array";
-        include_once $conf['ganglia_dir'] . "/functions.php";
-        include_once $conf['ganglia_dir'] . "/ganglia.php";
-        include_once $conf['ganglia_dir'] . "/get_ganglia.php";
+        include_once $conf['gweb_root'] . "/functions.php";
+        include_once $conf['gweb_root'] . "/ganglia.php";
+        include_once $conf['gweb_root'] . "/get_ganglia.php";
 
         foreach ( $index_array['cluster'] as $hostname => $elements ) {
             $hosts[] = $hostname;
@@ -1429,7 +1429,7 @@ function retrieve_metrics_cache () {
       }
       // Set up for cluster summary
       $context = "index_array";
-      include_once $conf['ganglia_dir'] . "/ganglia.php";
+      include_once $conf['gweb_root'] . "/ganglia.php";
       Gmetad($conf['ganglia_ip'], $conf['ganglia_port']);
 
       foreach ( $index_array['cluster'] as $hostname => $elements ) {

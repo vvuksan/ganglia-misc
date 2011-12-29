@@ -3,9 +3,9 @@
 #
 # Gmetad-webfrontend version. Used to check for updates.
 #
-$conf['ganglia_dir'] = dirname(__FILE__);
+$conf['gweb_root'] = dirname(__FILE__);
 
-include_once $conf['ganglia_dir'] . "/version.php";
+include_once $conf['gweb_root'] . "/version.php";
 
 #
 # 'readonly': No authentication is required.  All users may view all resources.  No edits are allowed.
