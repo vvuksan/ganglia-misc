@@ -142,7 +142,6 @@
 ./usr/share/ganglia-webfrontend/tattle_autocomplete.php
 ./usr/share/ganglia-webfrontend/meta_view.php
 ./usr/share/ganglia-webfrontend/eval_conf.php
-./usr/share/ganglia-webfrontend/conf.php
 ./usr/share/ganglia-webfrontend/dwoo/dwooAutoload.php
 ./usr/share/ganglia-webfrontend/dwoo/plugins/builtin/helper.array.php
 ./usr/share/ganglia-webfrontend/dwoo/plugins/builtin/functions/extends.php
